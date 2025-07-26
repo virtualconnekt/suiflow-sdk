@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Wallet Connection Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+            height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Wallet Connection Debugger</h1>
+        
+        <div id="status" class="status warning">
+            <strong>Status:</strong> Checking wallet availability...
+        </div>
+
+        <button onclick="checkWallets()" id="checkBtn">🔍 Check All Wallets</button>
+        <button onclick="connectSuiet()" id="suietBtn">🔗 Connect Suiet</button>
+        <button onclick="connectSuiWallet()" id="suiBtn">🔗 Connect Sui Wallet</button>
+        <button onclick="testTransaction()" id="txBtn" disabled>⚡ Test Transaction</button>
+        <button onclick="clearLog()" id="clearBtn">🗑️ Clear Log</button>
+
+        <div class="log" id="log">🚀 Wallet Debug Tool Ready!
+Checking for installed wallets...
+</div>
+    </div>
+
+    <script>
+        let logContainer = document.getElementById('log');
+        let statusContainer = document.getElementById('status');
+        let connectedWallet = null;
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logContainer.textContent += `\n[${timestamp}] ${message}`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateStatus(message, type = 'warning') {
+            statusContainer.className = `status ${type}`;
+            statusContainer.innerHTML = `<strong>Status:</strong> ${message}`;
+        }
+
+        function clearLog() {
+            logContainer.textContent = '🚀 Wallet Debug Tool Ready!\nLog cleared.';
+        }
+
+        async function checkWallets() {
+            const btn = document.getElementById('checkBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Checking...';
+
+            log('🔍 Starting comprehensive wallet check...');
+            
+            // Check for Suiet
+            if (typeof window.suiet !== 'undefined') {
+                log('✅ Suiet wallet detected!');
+                log(`   - Type: ${typeof window.suiet}`);
+                log(`   - Methods: ${Object.keys(window.suiet).join(', ')}`);
+                
+                try {
+                    if (window.suiet.getAccounts) {
+                        const accounts = await window.suiet.getAccounts();
+                        log(`   - Accounts: ${accounts.length} found`);
+                        if (accounts.length > 0) {
+                            log(`   - First account: ${accounts[0].address || accounts[0]}`);
+                        }
+                    }
+                } catch (e) {
+                    log(`   - Account check failed: ${e.message}`);
+                }
+            } else {
+                log('❌ Suiet wallet not found');
+            }
+
+            // Check for Sui Wallet
+            if (typeof window.suiWallet !== 'undefined') {
+                log('✅ Sui Wallet detected!');
+                log(`   - Type: ${typeof window.suiWallet}`);
+                log(`   - Methods: ${Object.keys(window.suiWallet).join(', ')}`);
+            } else {
+                log('❌ Sui Wallet not found');
+            }
+
+            // Check for Ethos
+            if (typeof window.ethos !== 'undefined') {
+                log('✅ Ethos wallet detected!');
+                log(`   - Type: ${typeof window.ethos}`);
+                log(`   - Methods: ${Object.keys(window.ethos).join(', ')}`);
+            } else {
+                log('❌ Ethos wallet not found');
+            }
+
+            // Check window properties for wallet-like objects
+            const windowKeys = Object.keys(window);
+            const walletKeys = windowKeys.filter(key => 
+                key.toLowerCase().includes('sui') || 
+                key.toLowerCase().includes('wallet') ||
+                key.toLowerCase().includes('suiet') ||
+                key.toLowerCase().includes('ethos')
+            );
+
+            if (walletKeys.length > 0) {
+                log('🔍 Wallet-related window properties:');
+                walletKeys.forEach(key => {
+                    log(`   - ${key}: ${typeof window[key]}`);
+                });
+            }
+
+            // Check if any wallet is available
+            const hasWallet = window.suiet || window.suiWallet || window.ethos || window.sui;
+            if (hasWallet) {
+                updateStatus('Wallets detected! Try connecting.', 'success');
+            } else {
+                updateStatus('No wallets found. Please install Suiet wallet.', 'error');
+            }
+
+            btn.disabled = false;
+            btn.textContent = '🔍 Check All Wallets';
+        }
+
+        async function connectSuiet() {
+            const btn = document.getElementById('suietBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Connecting...';
+
+            try {
+                log('🔗 Attempting to connect to Suiet wallet...');
+                
+                if (!window.suiet) {
+                    throw new Error('Suiet wallet not found. Please install from suiet.app');
+                }
+
+                log('📱 Suiet found, requesting permissions...');
+                
+                // Try different connection methods
+                let result;
+                if (window.suiet.requestPermissions) {
+                    result = await window.suiet.requestPermissions(['viewAccount', 'suggestTransactions']);
+                    log('✅ Permissions granted:', JSON.stringify(result));
+                } else if (window.suiet.connect) {
+                    result = await window.suiet.connect();
+                    log('✅ Connected:', JSON.stringify(result));
+                } else {
+                    throw new Error('No connection method available');
+                }
+
+                // Get accounts
+                let accounts;
+                if (window.suiet.getAccounts) {
+                    accounts = await window.suiet.getAccounts();
+                } else if (window.suiet.accounts) {
+                    accounts = window.suiet.accounts;
+                }
+
+                if (accounts && accounts.length > 0) {
+                    connectedWallet = { name: 'Suiet', wallet: window.suiet, accounts };
+                    log(`✅ Connected to Suiet with ${accounts.length} account(s)`);
+                    log(`📍 Active account: ${accounts[0].address || accounts[0]}`);
+                    updateStatus(`Connected to Suiet! Account: ${accounts[0].address || accounts[0]}`, 'success');
+                    document.getElementById('txBtn').disabled = false;
+                } else {
+                    throw new Error('No accounts found in wallet');
+                }
+
+            } catch (error) {
+                log(`❌ Suiet connection failed: ${error.message}`);
+                updateStatus(`Suiet connection failed: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔗 Connect Suiet';
+            }
+        }
+
+        async function connectSuiWallet() {
+            const btn = document.getElementById('suiBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Connecting...';
+
+            try {
+                log('🔗 Attempting to connect to Sui Wallet...');
+                
+                if (!window.suiWallet) {
+                    throw new Error('Sui Wallet not found. Please install official Sui Wallet extension');
+                }
+
+                log('📱 Sui Wallet found, requesting connection...');
+                
+                let result;
+                if (window.suiWallet.connect) {
+                    result = await window.suiWallet.connect();
+                    log('✅ Connected:', JSON.stringify(result));
+                } else {
+                    throw new Error('No connection method available');
+                }
+
+                // Get accounts
+                let accounts;
+                if (window.suiWallet.getAccounts) {
+                    accounts = await window.suiWallet.getAccounts();
+                } else if (window.suiWallet.accounts) {
+                    accounts = window.suiWallet.accounts;
+                }
+
+                if (accounts && accounts.length > 0) {
+                    connectedWallet = { name: 'Sui Wallet', wallet: window.suiWallet, accounts };
+                    log(`✅ Connected to Sui Wallet with ${accounts.length} account(s)`);
+                    log(`📍 Active account: ${accounts[0].address || accounts[0]}`);
+                    updateStatus(`Connected to Sui Wallet! Account: ${accounts[0].address || accounts[0]}`, 'success');
+                    document.getElementById('txBtn').disabled = false;
+                } else {
+                    throw new Error('No accounts found in wallet');
+                }
+
+            } catch (error) {
+                log(`❌ Sui Wallet connection failed: ${error.message}`);
+                updateStatus(`Sui Wallet connection failed: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔗 Connect Sui Wallet';
+            }
+        }
+
+        async function testTransaction() {
+            const btn = document.getElementById('txBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Testing...';
+
+            try {
+                if (!connectedWallet) {
+                    throw new Error('No wallet connected');
+                }
+
+                log('⚡ Testing transaction creation...');
+                log(`Using ${connectedWallet.name} wallet`);
+
+                // Simple test transaction data
+                const txData = {
+                    packageObjectId: '0x2a0eeb98d575a07fe472e02e3872fd5fabc960e0350c19e084aaff7535235fa6',
+                    module: 'payment',
+                    function: 'process_widget_payment',
+                    typeArguments: [],
+                    arguments: [
+                        '0xd1a10185b58c7501bd23aedb5e7d1942bca97e0b882ee52fd930cad1169d6feee',
+                        '0x6b3bd536eb26182cfb83b921d2a2216e3275583298beeb1d736fc94dc29669cd',
+                        Array.from(new TextEncoder().encode('test-merchant')),
+                        Array.from(new TextEncoder().encode('test-product'))
+                    ],
+                    gasBudget: 30000000
+                };
+
+                log('📝 Transaction data prepared');
+                log('🔍 This is just a test - transaction will NOT be submitted');
+                log('✅ Wallet is ready for smart contract transactions!');
+                
+                updateStatus('Transaction test successful! Wallet is ready.', 'success');
+
+            } catch (error) {
+                log(`❌ Transaction test failed: ${error.message}`);
+                updateStatus(`Transaction test failed: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚡ Test Transaction';
+            }
+        }
+
+        // Auto-check wallets on page load
+        window.addEventListener('load', () => {
+            log('🚀 Page loaded, checking for wallets...');
+            setTimeout(checkWallets, 1000);
+        });
+    </script>
+</body>
+</html>

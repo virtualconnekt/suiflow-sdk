@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuiFlow Enhanced SDK Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .log {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .capabilities {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .capability-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .capability-item:last-child {
+            border-bottom: none;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge.enabled { background: #28a745; color: white; }
+        .badge.disabled { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 SuiFlow Enhanced SDK Test (v1.1.0)</h1>
+        
+        <!-- SDK Configuration -->
+        <div class="section">
+            <h3>⚙️ SDK Configuration</h3>
+            <div class="grid">
+                <div>
+                    <div class="form-group">
+                        <label>Contract Package ID:</label>
+                        <input type="text" id="contractPackageId" placeholder="0x1234...">
+                    </div>
+                    <div class="form-group">
+                        <label>Contract Object ID:</label>
+                        <input type="text" id="contractObjectId" placeholder="0x5678...">
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>RPC URL:</label>
+                        <input type="text" id="rpcUrl" value="https://fullnode.testnet.sui.io:443">
+                    </div>
+                    <div class="form-group">
+                        <label>Admin Fee (SUI):</label>
+                        <input type="number" id="adminFee" value="0.01" step="0.001">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="useSmartContract"> Enable Smart Contract Payments
+                </label>
+            </div>
+            <button onclick="configureSDK()">💾 Apply Configuration</button>
+        </div>
+
+        <!-- SDK Capabilities -->
+        <div class="section">
+            <h3>🛠️ SDK Capabilities</h3>
+            <div class="capabilities" id="capabilities">
+                <div class="capability-item">
+                    <span>SDK Version:</span>
+                    <span id="sdkVersion">Loading...</span>
+                </div>
+                <div class="capability-item">
+                    <span>Smart Contract Support:</span>
+                    <span id="smartContractSupport" class="badge disabled">Disabled</span>
+                </div>
+                <div class="capability-item">
+                    <span>Wallet Connection:</span>
+                    <span id="walletConnection" class="badge disabled">Checking...</span>
+                </div>
+                <div class="capability-item">
+                    <span>Available Methods:</span>
+                    <span id="availableMethods">popup</span>
+                </div>
+            </div>
+            <button onclick="refreshCapabilities()">🔄 Refresh Status</button>
+        </div>
+
+        <!-- Payment Testing -->
+        <div class="section">
+            <h3>💳 Payment Testing</h3>
+            <div class="grid">
+                <div>
+                    <div class="form-group">
+                        <label>Merchant ID:</label>
+                        <input type="text" id="merchantId" value="687b8e4455ee9491cb288826">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount (SUI):</label>
+                        <input type="number" id="amount" value="1.0" step="0.1" min="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Merchant Address (for smart contract):</label>
+                        <input type="text" id="merchantAddress" placeholder="0x...">
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Product ID (optional):</label>
+                        <input type="text" id="productId" value="widget">
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method:</label>
+                        <select id="paymentMethod">
+                            <option value="widget">Smart Contract + Popup Fallback</option>
+                            <option value="contract">Smart Contract Only</option>
+                            <option value="popup">Popup Only</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <button onclick="testPayment()" id="payButton">🚀 Test Payment</button>
+                <button onclick="clearLog()">🗑️ Clear Log</button>
+            </div>
+        </div>
+
+        <!-- Transaction Log -->
+        <div class="section">
+            <h3>📊 Transaction Log</h3>
+            <div class="log" id="transactionLog">
+🚀 SuiFlow Enhanced SDK Test Ready!
+📋 Configure your smart contract details above
+💡 Try different payment methods to test functionality
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Enhanced SDK -->
+    <script src="sdk/suiflow-enhanced.js"></script>
+    
+    <script>
+        let logContainer = document.getElementById('transactionLog');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logContainer.innerHTML += '\n' + logEntry;
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(logEntry);
+        }
+
+        function clearLog() {
+            logContainer.innerHTML = '🚀 SuiFlow Enhanced SDK Test Ready!\n📋 Transaction log cleared';
+        }
+
+        function configureSDK() {
+            const config = {
+                contractPackageId: document.getElementById('contractPackageId').value || null,
+                contractObjectId: document.getElementById('contractObjectId').value || null,
+                rpcUrl: document.getElementById('rpcUrl').value,
+                useSmartContract: document.getElementById('useSmartContract').checked,
+                adminFee: parseFloat(document.getElementById('adminFee').value)
+            };
+
+            try {
+                window.Suiflow.configure(config);
+                log('✅ SDK configured successfully');
+                log(`📊 Config: ${JSON.stringify(config, null, 2)}`);
+                refreshCapabilities();
+            } catch (error) {
+                log(`❌ Configuration error: ${error.message}`, 'error');
+            }
+        }
+
+        async function refreshCapabilities() {
+            try {
+                // Update version
+                document.getElementById('sdkVersion').textContent = window.Suiflow.version || 'Unknown';
+                
+                // Check smart contract support
+                const smartContractEnabled = window.Suiflow.isSmartContractEnabled();
+                const smartContractBadge = document.getElementById('smartContractSupport');
+                smartContractBadge.textContent = smartContractEnabled ? 'Enabled' : 'Disabled';
+                smartContractBadge.className = `badge ${smartContractEnabled ? 'enabled' : 'disabled'}`;
+                
+                // Check wallet connection
+                const walletConnected = await window.Suiflow.checkWalletConnection();
+                const walletBadge = document.getElementById('walletConnection');
+                walletBadge.textContent = walletConnected ? 'Connected' : 'Not Connected';
+                walletBadge.className = `badge ${walletConnected ? 'enabled' : 'disabled'}`;
+                
+                // Update available methods
+                const methods = window.Suiflow.getPaymentMethods();
+                document.getElementById('availableMethods').textContent = methods.join(', ');
+                
+                log('🔄 Capabilities refreshed');
+            } catch (error) {
+                log(`❌ Error refreshing capabilities: ${error.message}`, 'error');
+            }
+        }
+
+        async function testPayment() {
+            const payButton = document.getElementById('payButton');
+            payButton.disabled = true;
+            payButton.textContent = '⏳ Processing...';
+
+            try {
+                const merchantId = document.getElementById('merchantId').value;
+                const amount = parseFloat(document.getElementById('amount').value);
+                const merchantAddress = document.getElementById('merchantAddress').value;
+                const productId = document.getElementById('productId').value;
+                const paymentMethod = document.getElementById('paymentMethod').value;
+
+                if (!merchantId || !amount) {
+                    throw new Error('Merchant ID and amount are required');
+                }
+
+                log(`🚀 Starting ${paymentMethod} payment...`);
+                log(`💰 Amount: ${amount} SUI | Merchant: ${merchantId}`);
+
+                const options = {
+                    merchantId,
+                    amount,
+                    onSuccess: (txHash, paidAmount, details) => {
+                        log(`✅ Payment successful!`);
+                        log(`📦 TX Hash: ${txHash}`);
+                        log(`💰 Amount: ${paidAmount} SUI`);
+                        if (details) {
+                            log(`📊 Method: ${details.method}`);
+                            log(`🔗 Details: ${JSON.stringify(details, null, 2)}`);
+                        }
+                        payButton.disabled = false;
+                        payButton.textContent = '🚀 Test Payment';
+                    },
+                    onError: (error) => {
+                        log(`❌ Payment failed: ${error}`, 'error');
+                        payButton.disabled = false;
+                        payButton.textContent = '🚀 Test Payment';
+                    },
+                    onProgress: (message) => {
+                        log(`📍 ${message}`);
+                    }
+                };
+
+                if (paymentMethod === 'contract') {
+                    if (!merchantAddress) {
+                        throw new Error('Merchant address is required for smart contract payments');
+                    }
+                    await window.Suiflow.payWithContract({
+                        ...options,
+                        merchantAddress,
+                        productId
+                    });
+                } else if (paymentMethod === 'popup') {
+                    window.Suiflow.payWithPopup(options);
+                } else {
+                    // Default: widget (hybrid)
+                    await window.Suiflow.payWithWidget(options);
+                }
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                payButton.disabled = false;
+                payButton.textContent = '🚀 Test Payment';
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', async () => {
+            log('🚀 Page loaded, initializing SDK...');
+            await refreshCapabilities();
+            log('✅ SDK ready for testing!');
+        });
+    </script>
+</body>
+</html>

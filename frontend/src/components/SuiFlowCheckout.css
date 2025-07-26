@@ -1,0 +1,752 @@
+/* SuiFlow Checkout Styles */
+.sui-checkout-container {
+  min-height: 100vh;
+  background: var(--background-gradient);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.sui-checkout-header {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.sui-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sui-logo-image {
+  width: 150px;
+  height: 150px;
+  object-fit: scale-down;
+  border-radius: 8px;
+}
+
+.sui-secure-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--success);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.sui-checkout-content {
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  width: 100%;
+}
+
+.sui-product-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-2xl);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.sui-product-image {
+  width: 80px;
+  height: 80px;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.sui-product-details {
+  flex: 1;
+}
+
+.sui-product-details h2 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.sui-product-details p {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.sui-product-price {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.sui-price-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.sui-price-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.sui-price-conversion {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-left: 0.5rem;
+}
+
+.sui-price-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.sui-exchange-rate-info {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Currency Selector Styles */
+.sui-currency-selector {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+}
+
+.sui-currency-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.sui-currency-options {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sui-currency-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.sui-currency-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.sui-currency-btn.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.sui-currency-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sui-loading-spinner.small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.sui-price-currency {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.sui-payment-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sui-payment-step {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-2xl);
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.sui-payment-step.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+}
+
+.sui-step-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sui-step-number {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.sui-step-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+/* Email collection form styles */
+.sui-email-collection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sui-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sui-form-label {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.sui-form-input {
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.sui-form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.sui-form-input.valid {
+  border-color: var(--success);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.sui-form-input.invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.sui-form-help {
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.sui-form-error {
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.sui-email-confirmation {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sui-email-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sui-email-label {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.sui-email-value {
+  color: var(--success);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.sui-email-confirmation-text {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--success);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.sui-connect-wallet {
+  text-align: center;
+}
+
+.sui-connect-wallet p {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.sui-connect-button {
+  background: var(--primary-gradient) !important;
+  color: var(--text-primary) !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  padding: 1rem 2rem !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+}
+
+.sui-connect-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+}
+
+.sui-payment-review {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sui-wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+}
+
+.sui-wallet-info svg {
+  color: var(--accent-cyan);
+}
+
+.sui-wallet-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.sui-wallet-address {
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.sui-payment-summary {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.sui-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sui-summary-item:last-child {
+  border-bottom: none;
+}
+
+.sui-summary-item.sui-total {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+}
+
+.sui-pay-button {
+  background: var(--primary-gradient);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 1rem 2rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  width: 100%;
+}
+
+.sui-pay-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.sui-pay-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sui-loading-spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.sui-success-content {
+  text-align: center;
+}
+
+.sui-success-checkmark {
+  width: 80px;
+  height: 80px;
+  background: var(--success-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: var(--text-primary);
+}
+
+.sui-success-content h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.sui-success-content p {
+  margin: 0 0 2rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.sui-transaction-details {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.sui-transaction-details span {
+  display: block;
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.sui-transaction-details code {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  color: var(--accent-cyan);
+  word-break: break-all;
+}
+
+.sui-success-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.sui-button {
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.sui-button-primary {
+  background: var(--primary-gradient);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.sui-button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.sui-button-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sui-button-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.sui-error-message {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  z-index: 1000;
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sui-checkout-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .sui-checkout-content {
+    padding: 2rem 1rem;
+  }
+  
+  .sui-product-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .sui-success-actions {
+    flex-direction: column;
+  }
+  
+  .sui-wallet-info {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* FlowX Integration Styles */
+.sui-flowx-option {
+  margin: 1.5rem 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.sui-flowx-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(37, 117, 252, 0.1);
+  color: var(--primary-500);
+  border: 1px solid var(--primary-500);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sui-flowx-toggle.active {
+  background-color: rgba(37, 117, 252, 0.3);
+  color: #fff;
+}
+
+.sui-flowx-toggle:hover {
+  background-color: rgba(37, 117, 252, 0.15);
+}
+
+.sui-flowx-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sui-flowx-widget-container {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background-color: rgba(15, 23, 42, 0.05);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.sui-flowx-header {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.sui-flowx-header h4 {
+  color: var(--primary-500);
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.sui-flowx-info {
+  margin: 0 0 1rem 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.sui-flowx-iframe-container {
+  width: 100%;
+  height: 400px;
+  margin: 1rem 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Styles for the actual SwapWidget component */
+.sui-flowx-iframe-container > div {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+}
+
+.sui-flowx-instructions {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(99, 102, 241, 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.sui-flowx-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.sui-flowx-step:last-child {
+  margin-bottom: 0;
+}
+
+.sui-flowx-step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--primary-500);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.sui-flowx-step-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

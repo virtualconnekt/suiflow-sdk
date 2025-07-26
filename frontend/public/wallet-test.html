@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Sui Wallet Detection Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button {
+            background: linear-gradient(45deg, #10B981, #059669);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Sui Wallet Detection & Connection Test</h1>
+        <p>This page will help diagnose wallet connection issues with SuiFlow smart contracts.</p>
+        
+        <h2>📱 Wallet Detection Results</h2>
+        <div id="detection-results">
+            <div class="info">Running wallet detection...</div>
+        </div>
+        
+        <h2>🔧 Wallet Installation Guide</h2>
+        <div class="warning">
+            <strong>📋 Recommended Sui Wallets:</strong><br>
+            1. <strong>Suiet Wallet:</strong> <a href="https://suiet.app/" target="_blank">suiet.app</a> (Most compatible)<br>
+            2. <strong>Sui Wallet:</strong> <a href="https://chrome.google.com/webstore/detail/sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil" target="_blank">Chrome Store</a><br>
+            3. <strong>Ethos Wallet:</strong> <a href="https://ethoswallet.xyz/" target="_blank">ethoswallet.xyz</a>
+        </div>
+        
+        <h2>🧪 Connection Tests</h2>
+        <button onclick="testWalletDetection()">🔍 Re-run Detection</button>
+        <button onclick="testWalletConnection()">🔗 Test Connection</button>
+        <button onclick="testSmartContractCall()">⚡ Test Smart Contract</button>
+        
+        <div id="test-results"></div>
+        
+        <h2>🛠️ Troubleshooting Steps</h2>
+        <div class="info">
+            <strong>If no wallet is detected:</strong><br>
+            1. ✅ Install a Sui wallet extension<br>
+            2. ✅ Refresh this page after installation<br>
+            3. ✅ Make sure the extension is enabled<br>
+            4. ✅ Create or import a wallet account<br>
+            5. ✅ Switch to Testnet in wallet settings<br>
+            6. ✅ Get testnet SUI from <a href="https://faucet.sui.io/" target="_blank">faucet.sui.io</a>
+        </div>
+        
+        <h2>🔍 Debug Information</h2>
+        <div class="code" id="debug-info">Loading debug info...</div>
+    </div>
+
+    <script>
+        function updateResults(elementId, content) {
+            document.getElementById(elementId).innerHTML = content;
+        }
+        
+        function addResult(content) {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML += content + '<br>';
+        }
+        
+        async function detectWallets() {
+            const results = [];
+            
+            // Check for Suiet
+            if (window.suiet) {
+                results.push('<div class="success">✅ Suiet Wallet: Detected</div>');
+            } else {
+                results.push('<div class="error">❌ Suiet Wallet: Not found</div>');
+            }
+            
+            // Check for Sui Wallet
+            if (window.suiWallet) {
+                results.push('<div class="success">✅ Sui Wallet: Detected</div>');
+            } else {
+                results.push('<div class="error">❌ Sui Wallet: Not found</div>');
+            }
+            
+            // Check for Ethos
+            if (window.ethos) {
+                results.push('<div class="success">✅ Ethos Wallet: Detected</div>');
+            } else {
+                results.push('<div class="error">❌ Ethos Wallet: Not found</div>');
+            }
+            
+            // Check for generic sui
+            if (window.sui) {
+                results.push('<div class="success">✅ Generic Sui Provider: Detected</div>');
+            } else {
+                results.push('<div class="error">❌ Generic Sui Provider: Not found</div>');
+            }
+            
+            if (results.every(r => r.includes('❌'))) {
+                results.push('<div class="error"><strong>🚨 No Sui wallets detected!</strong><br>Please install one of the recommended wallets above.</div>');
+            }
+            
+            return results.join('');
+        }
+        
+        async function testWalletDetection() {
+            updateResults('detection-results', '<div class="info">🔍 Running detection...</div>');
+            setTimeout(async () => {
+                const results = await detectWallets();
+                updateResults('detection-results', results);
+            }, 500);
+        }
+        
+        async function testWalletConnection() {
+            addResult('<div class="info">🔗 Testing wallet connection...</div>');
+            
+            try {
+                // Find available wallet
+                const wallet = window.suiet || window.suiWallet || window.ethos || window.sui;
+                
+                if (!wallet) {
+                    addResult('<div class="error">❌ No wallet found for connection test</div>');
+                    return;
+                }
+                
+                // Try to connect
+                let connectResult;
+                if (wallet.requestPermissions) {
+                    connectResult = await wallet.requestPermissions(['viewAccount', 'suggestTransactions']);
+                } else if (wallet.connect) {
+                    connectResult = await wallet.connect();
+                } else if (wallet.enable) {
+                    connectResult = await wallet.enable();
+                }
+                
+                if (connectResult) {
+                    addResult('<div class="success">✅ Wallet connection successful!</div>');
+                    
+                    // Try to get accounts
+                    let accounts;
+                    if (wallet.getAccounts) {
+                        accounts = await wallet.getAccounts();
+                    } else if (wallet.accounts) {
+                        accounts = wallet.accounts;
+                    }
+                    
+                    if (accounts && accounts.length > 0) {
+                        addResult(`<div class="success">✅ Found ${accounts.length} account(s)</div>`);
+                        addResult(`<div class="info">📍 Active address: ${accounts[0].address}</div>`);
+                    } else {
+                        addResult('<div class="warning">⚠️ No accounts found in wallet</div>');
+                    }
+                } else {
+                    addResult('<div class="error">❌ Wallet connection failed or denied</div>');
+                }
+                
+            } catch (error) {
+                addResult(`<div class="error">❌ Connection error: ${error.message}</div>`);
+            }
+        }
+        
+        async function testSmartContractCall() {
+            addResult('<div class="info">⚡ Testing smart contract integration...</div>');
+            
+            try {
+                // This will test if our enhanced SDK can detect wallets
+                if (typeof window.Suiflow === 'undefined') {
+                    addResult('<div class="error">❌ SuiFlow SDK not loaded</div>');
+                    return;
+                }
+                
+                const walletConnected = await window.Suiflow.checkWalletConnection();
+                if (walletConnected) {
+                    addResult('<div class="success">✅ SuiFlow SDK can detect connected wallet</div>');
+                } else {
+                    addResult('<div class="warning">⚠️ SuiFlow SDK: No wallet connection detected</div>');
+                }
+                
+                addResult('<div class="info">📋 Available payment methods: ' + 
+                         window.Suiflow.getPaymentMethods().join(', ') + '</div>');
+                
+            } catch (error) {
+                addResult(`<div class="error">❌ SDK test error: ${error.message}</div>`);
+            }
+        }
+        
+        function updateDebugInfo() {
+            const debugInfo = {
+                'User Agent': navigator.userAgent,
+                'Current URL': window.location.href,
+                'Window Objects': Object.keys(window).filter(key => key.toLowerCase().includes('sui')).join(', ') || 'None found',
+                'Suiet Present': !!window.suiet,
+                'SuiWallet Present': !!window.suiWallet,
+                'Ethos Present': !!window.ethos,
+                'Generic Sui Present': !!window.sui,
+                'SuiFlow SDK Loaded': typeof window.Suiflow !== 'undefined'
+            };
+            
+            let debugText = '';
+            for (const [key, value] of Object.entries(debugInfo)) {
+                debugText += `${key}: ${value}\n`;
+            }
+            
+            updateResults('debug-info', debugText);
+        }
+        
+        // Run initial detection
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testWalletDetection();
+                updateDebugInfo();
+            }, 1000); // Wait a bit for extensions to load
+        });
+    </script>
+    
+    <!-- Load SuiFlow SDK for testing -->
+    <script src="sdk/suiflow-enhanced.js"></script>
+</body>
+</html>

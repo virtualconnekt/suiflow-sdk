@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VTU Demo - SuiFlow Integration (Offline Test)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f8fafc;
+    }
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .balance {
+      background: #10b981;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .service-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .topup-section {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .topup-section input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    .topup-section input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    .btn-primary {
+      background: #4f46e5;
+      color: white;
+    }
+    .btn-crypto {
+      background: #f59e0b;
+      color: white;
+      width: 100%;
+    }
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    .transaction-history {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    .transaction {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .success { color: #10b981; font-weight: 600; }
+    .pending { color: #f59e0b; font-weight: 600; }
+    .demo-notice {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      color: #92400e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    .payment-status {
+      background: #dcfce7;
+      border: 2px solid #16a34a;
+      color: #166534;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-notice">
+    🧪 <strong>Demo Mode:</strong> This simulates how SuiFlow would integrate with your VTU website. Click "Pay with SuiFlow" to see the flow!
+  </div>
+
+  <div class="header">
+    <h1>🌟 MyVTU - Virtual Top Up Service</h1>
+    <div class="balance" id="user-balance">
+      Balance: 1,250 credits
+    </div>
+  </div>
+
+  <!-- Crypto Top-up Section -->
+  <div class="topup-section">
+    <h2>💎 Top Up with Cryptocurrency</h2>
+    <p>Fund your account instantly with SUI tokens. 1 SUI = 100 credits</p>
+    
+    <div class="form-group">
+      <label>Amount to Top Up (SUI)</label>
+      <input 
+        type="number" 
+        id="crypto-amount" 
+        placeholder="Enter SUI amount (min 0.01)" 
+        min="0.01" 
+        step="0.01" 
+        value="1.0"
+      />
+      <small style="opacity: 0.8;">You will receive: <span id="credits-preview">100</span> credits</small>
+    </div>
+    
+    <div class="payment-status" id="payment-status">
+      ✅ Payment successful! Credits have been added to your account.
+    </div>
+    
+    <button class="btn btn-crypto" onclick="demoPayment()">
+      🚀 Pay with SuiFlow (Demo)
+    </button>
+  </div>
+
+  <div class="services">
+    <!-- Airtime Service -->
+    <div class="service-card">
+      <h3>📱 Buy Airtime</h3>
+      <div class="form-group">
+        <label>Network</label>
+        <select>
+          <option>MTN Nigeria</option>
+          <option>Airtel Nigeria</option>
+          <option>Glo Nigeria</option>
+          <option>9mobile Nigeria</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" placeholder="08012345678">
+      </div>
+      <div class="form-group">
+        <label>Amount (Credits)</label>
+        <input type="number" placeholder="100" min="50">
+      </div>
+      <button class="btn btn-success" onclick="purchaseService('airtime', 100)">Buy Airtime (100 credits)</button>
+    </div>
+
+    <!-- Data Service -->
+    <div class="service-card">
+      <h3>🌐 Buy Data</h3>
+      <div class="form-group">
+        <label>Network</label>
+        <select>
+          <option>MTN Nigeria</option>
+          <option>Airtel Nigeria</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Data Plan</label>
+        <select>
+          <option>1GB - 100 credits</option>
+          <option>2GB - 180 credits</option>
+          <option>5GB - 400 credits</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" placeholder="08012345678">
+      </div>
+      <button class="btn btn-success" onclick="purchaseService('data', 100)">Buy Data (100 credits)</button>
+    </div>
+
+    <!-- Electricity -->
+    <div class="service-card">
+      <h3>⚡ Electricity Bills</h3>
+      <div class="form-group">
+        <label>Disco</label>
+        <select>
+          <option>EKEDC</option>
+          <option>IKEDC</option>
+          <option>AEDC</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Meter Number</label>
+        <input type="text" placeholder="Enter meter number">
+      </div>
+      <div class="form-group">
+        <label>Amount (Credits)</label>
+        <input type="number" placeholder="500" min="100">
+      </div>
+      <button class="btn btn-success" onclick="purchaseService('electricity', 500)">Pay Bill (500 credits)</button>
+    </div>
+
+    <!-- Cable TV -->
+    <div class="service-card">
+      <h3>📺 Cable TV</h3>
+      <div class="form-group">
+        <label>Provider</label>
+        <select>
+          <option>DStv</option>
+          <option>GOtv</option>
+          <option>Startimes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Smart Card Number</label>
+        <input type="text" placeholder="Enter smart card number">
+      </div>
+      <div class="form-group">
+        <label>Package</label>
+        <select>
+          <option>DStv Compact - 800 credits</option>
+          <option>DStv Premium - 1500 credits</option>
+        </select>
+      </div>
+      <button class="btn btn-success" onclick="purchaseService('cable', 800)">Subscribe (800 credits)</button>
+    </div>
+  </div>
+
+  <!-- Transaction History -->
+  <div class="transaction-history">
+    <h3>📋 Recent Transactions</h3>
+    <div id="transactions-list">
+      <div class="transaction">
+        <div>
+          <strong>Crypto Top-up</strong><br>
+          <small>2.5 SUI → 250 credits</small>
+        </div>
+        <div class="success">✅ Completed</div>
+      </div>
+      <div class="transaction">
+        <div>
+          <strong>MTN Airtime</strong><br>
+          <small>₦500 to 08012345678</small>
+        </div>
+        <div class="success">✅ Completed</div>
+      </div>
+      <div class="transaction">
+        <div>
+          <strong>Crypto Top-up</strong><br>
+          <small>1.0 SUI → 100 credits</small>
+        </div>
+        <div class="pending">⏳ Processing</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Update credits preview
+    document.getElementById('crypto-amount').addEventListener('input', function() {
+      const amount = parseFloat(this.value) || 0;
+      const credits = Math.floor(amount * 100); // 1 SUI = 100 credits
+      document.getElementById('credits-preview').textContent = credits;
+    });
+
+    // User data (in real app, this would come from your backend)
+    let userData = {
+      userId: 'user123',
+      currentBalance: 1250,
+      transactions: []
+    };
+
+    // Demo payment function (simulates SuiFlow widget)
+    function demoPayment() {
+      const amount = parseFloat(document.getElementById('crypto-amount').value);
+      
+      if (!amount || amount < 0.01) {
+        alert('Minimum top-up is 0.01 SUI');
+        return;
+      }
+
+      // Show processing state
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = '⏳ Processing Payment...';
+      button.disabled = true;
+
+      // Simulate payment processing delay
+      setTimeout(() => {
+        // Generate mock transaction hash
+        const mockTxHash = '0x' + Math.random().toString(16).substr(2, 64);
+        
+        console.log('🎉 Demo Payment Successful!');
+        console.log('Amount:', amount, 'SUI');
+        console.log('Mock Transaction Hash:', mockTxHash);
+        
+        // Process the top-up
+        processTopUp(amount, mockTxHash);
+        
+        // Show success status
+        document.getElementById('payment-status').style.display = 'block';
+        
+        // Reset button
+        button.textContent = originalText;
+        button.disabled = false;
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => {
+          document.getElementById('payment-status').style.display = 'none';
+        }, 5000);
+        
+      }, 2000); // 2 second delay to simulate processing
+    }
+
+    function processTopUp(suiAmount, txHash) {
+      // Convert SUI to credits (1 SUI = 100 credits)
+      const creditsToAdd = Math.floor(suiAmount * 100);
+      
+      console.log(`💰 Processing top-up: ${suiAmount} SUI → ${creditsToAdd} credits`);
+      
+      // Update user balance
+      updateUserBalance(creditsToAdd, {
+        type: 'crypto_topup',
+        amount: suiAmount,
+        currency: 'SUI',
+        txHash: txHash,
+        credits: creditsToAdd,
+        timestamp: new Date()
+      });
+      
+      // Show success message
+      alert(`🎉 Top-up Successful!
+      
+✅ ${suiAmount} SUI paid
+💰 ${creditsToAdd} credits added
+🔗 Tx: ${txHash.slice(0, 16)}...
+
+Your new balance: ${userData.currentBalance} credits
+
+💡 In a real implementation:
+- This would connect to actual SUI wallet
+- Payment would be verified on blockchain
+- Credits would be saved to your database`);
+      
+      // Reset form
+      document.getElementById('crypto-amount').value = '1.0';
+      document.getElementById('credits-preview').textContent = '100';
+    }
+
+    function updateUserBalance(creditsToAdd, transaction) {
+      // Update balance
+      userData.currentBalance += creditsToAdd;
+      
+      // Add transaction to history
+      userData.transactions.unshift(transaction);
+      
+      // Update UI
+      document.getElementById('user-balance').textContent = `Balance: ${userData.currentBalance.toLocaleString()} credits`;
+      
+      // Add transaction to history display
+      addTransactionToHistory(transaction);
+      
+      // In real app: Send to backend
+      sendToBackend(userData, transaction);
+    }
+
+    function addTransactionToHistory(transaction) {
+      const transactionsList = document.getElementById('transactions-list');
+      const transactionElement = document.createElement('div');
+      transactionElement.className = 'transaction';
+      transactionElement.innerHTML = `
+        <div>
+          <strong>Crypto Top-up</strong><br>
+          <small>${transaction.amount} SUI → ${transaction.credits} credits</small>
+        </div>
+        <div class="success">✅ Completed</div>
+      `;
+      transactionsList.insertBefore(transactionElement, transactionsList.firstChild);
+    }
+
+    // Demo service purchase function
+    function purchaseService(serviceType, cost) {
+      if (userData.currentBalance >= cost) {
+        userData.currentBalance -= cost;
+        document.getElementById('user-balance').textContent = `Balance: ${userData.currentBalance.toLocaleString()} credits`;
+        
+        alert(`✅ Service purchased successfully!
+        
+Service: ${serviceType}
+Cost: ${cost} credits
+New balance: ${userData.currentBalance} credits`);
+        
+        // Add to transaction history
+        addServiceTransaction(serviceType, cost);
+      } else {
+        alert(`❌ Insufficient balance!
+        
+Required: ${cost} credits
+Available: ${userData.currentBalance} credits
+Shortfall: ${cost - userData.currentBalance} credits
+
+💡 Top up with crypto to continue!`);
+      }
+    }
+
+    function addServiceTransaction(serviceType, cost) {
+      const transactionsList = document.getElementById('transactions-list');
+      const transactionElement = document.createElement('div');
+      transactionElement.className = 'transaction';
+      transactionElement.innerHTML = `
+        <div>
+          <strong>${serviceType.charAt(0).toUpperCase() + serviceType.slice(1)} Service</strong><br>
+          <small>${cost} credits</small>
+        </div>
+        <div class="success">✅ Completed</div>
+      `;
+      transactionsList.insertBefore(transactionElement, transactionsList.firstChild);
+    }
+
+    // Backend integration simulation
+    function sendToBackend(userData, transaction) {
+      console.log('📡 Sending to backend:', {
+        endpoint: '/api/vtu/process-topup',
+        method: 'POST',
+        data: {
+          userId: userData.userId,
+          transaction: transaction,
+          newBalance: userData.currentBalance
+        }
+      });
+      
+      // In real implementation, this would be:
+      /*
+      fetch('/api/vtu/process-topup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        },
+        body: JSON.stringify({
+          userId: userData.userId,
+          transaction: transaction,
+          newBalance: userData.currentBalance
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('✅ Backend updated:', data);
+      })
+      .catch(error => {
+        console.error('❌ Backend error:', error);
+      });
+      */
+    }
+  </script>
+</body>
+</html>

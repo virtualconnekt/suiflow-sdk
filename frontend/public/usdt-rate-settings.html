@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuiFlow - Update USDT to Naira Rate</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .rate-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .live-price {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .form-group {
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        
+        .example-box {
+            background: #e0f2fe;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .conversion-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        
+        .arrow {
+            color: #667eea;
+            font-size: 20px;
+        }
+        
+        .tip {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .current-rate-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .rate-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">⚡ SuiFlow</div>
+            <div class="subtitle">Update USDT to Naira Exchange Rate</div>
+        </div>
+
+        <div class="live-price" id="livePriceCard">
+            <h3 style="margin: 0 0 15px 0;">🔴 Live SUI Market Price</h3>
+            <div class="price-row">
+                <span>Current Price:</span>
+                <span id="currentPrice">Loading...</span>
+            </div>
+            <div class="price-row">
+                <span>24h Change:</span>
+                <span id="priceChange">Loading...</span>
+            </div>
+            <div class="price-row">
+                <span>Last Updated:</span>
+                <span id="lastUpdated">Loading...</span>
+            </div>
+        </div>
+
+        <div class="rate-card">
+            <h3>💱 Set Your USDT to Naira Rate</h3>
+            
+            <div class="form-group">
+                <label for="merchantId">Merchant ID</label>
+                <input type="text" id="merchantId" placeholder="Enter your merchant ID" value="test-merchant-123">
+            </div>
+
+            <div class="form-group">
+                <label for="usdtRate">USDT Rate (1 USDT = ? NGN)</label>
+                <div class="input-container">
+                    <input type="number" id="usdtRate" placeholder="e.g., 1550" step="0.01" min="0">
+                    <button class="btn" onclick="updateUSDTRate()" id="updateBtn">
+                        Update Rate
+                    </button>
+                </div>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div class="current-rate-display" id="currentRateDisplay" style="display: none;">
+                <div>Current Rate</div>
+                <div class="rate-value" id="currentRateValue">1 USDT = ₦1,550</div>
+            </div>
+
+            <div class="example-box" id="exampleBox" style="display: none;">
+                <h4>💡 Conversion Example</h4>
+                <div class="conversion-flow">
+                    <span>₦10,000</span>
+                    <span class="arrow">→</span>
+                    <span id="usdtAmount">$6.45 USDT</span>
+                    <span class="arrow">→</span>
+                    <span id="suiAmount">1.73 SUI</span>
+                </div>
+                <div style="font-size: 14px; color: #666; text-align: center; margin-top: 10px;">
+                    Based on current live SUI price and your USDT rate
+                </div>
+            </div>
+
+            <div class="tip">
+                💡 <strong>How it works:</strong> Your customers pay in Nigerian Naira (NGN). 
+                The system converts NGN to USDT using your rate, then converts USDT to SUI using live market prices from Binance.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let livePrice = null;
+        let currentRate = null;
+
+        // API base URL - adjust for your backend
+        const API_BASE = 'http://localhost:5000/api/payments';
+
+        // Load initial data
+        async function loadInitialData() {
+            await fetchLivePrice();
+            await fetchCurrentRate();
+            setInterval(fetchLivePrice, 30000); // Update price every 30 seconds
+        }
+
+        // Fetch live SUI price
+        async function fetchLivePrice() {
+            try {
+                const response = await fetch(`${API_BASE}/live-prices`);
+                if (response.ok) {
+                    livePrice = await response.json();
+                    updateLivePriceDisplay();
+                }
+            } catch (error) {
+                console.error('Error fetching live price:', error);
+            }
+        }
+
+        // Fetch current merchant rate
+        async function fetchCurrentRate() {
+            const merchantId = document.getElementById('merchantId').value;
+            if (!merchantId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/merchant-settings/${merchantId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    currentRate = data.usdtToNgnRate || 1550;
+                    document.getElementById('usdtRate').value = currentRate;
+                    updateCurrentRateDisplay();
+                    updateExample();
+                }
+            } catch (error) {
+                console.error('Error fetching current rate:', error);
+                // Set default rate
+                currentRate = 1550;
+                document.getElementById('usdtRate').value = currentRate;
+                updateCurrentRateDisplay();
+            }
+        }
+
+        // Update live price display
+        function updateLivePriceDisplay() {
+            if (!livePrice) return;
+
+            document.getElementById('currentPrice').textContent = `$${livePrice.currentPrice?.toFixed(4)} USDT`;
+            
+            const changeElement = document.getElementById('priceChange');
+            const change = livePrice.priceChangePercent24h || 0;
+            changeElement.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+            changeElement.style.color = change >= 0 ? '#10b981' : '#ef4444';
+            
+            document.getElementById('lastUpdated').textContent = new Date(livePrice.lastUpdated).toLocaleTimeString();
+            
+            updateExample();
+        }
+
+        // Update current rate display
+        function updateCurrentRateDisplay() {
+            if (currentRate) {
+                document.getElementById('currentRateValue').textContent = `1 USDT = ₦${currentRate.toLocaleString()}`;
+                document.getElementById('currentRateDisplay').style.display = 'block';
+            }
+        }
+
+        // Update conversion example
+        function updateExample() {
+            if (!livePrice || !currentRate) return;
+
+            const exampleNGN = 10000;
+            const usdtAmount = exampleNGN / currentRate;
+            const suiAmount = usdtAmount / livePrice.currentPrice;
+
+            document.getElementById('usdtAmount').textContent = `$${usdtAmount.toFixed(4)} USDT`;
+            document.getElementById('suiAmount').textContent = `${suiAmount.toFixed(6)} SUI`;
+            document.getElementById('exampleBox').style.display = 'block';
+        }
+
+        // Update USDT rate
+        async function updateUSDTRate() {
+            const merchantId = document.getElementById('merchantId').value;
+            const newRate = parseFloat(document.getElementById('usdtRate').value);
+
+            if (!merchantId) {
+                showAlert('Please enter a merchant ID', 'error');
+                return;
+            }
+
+            if (!newRate || newRate <= 0) {
+                showAlert('Please enter a valid USDT rate', 'error');
+                return;
+            }
+
+            const updateBtn = document.getElementById('updateBtn');
+            updateBtn.disabled = true;
+            updateBtn.textContent = 'Updating...';
+
+            try {
+                const response = await fetch(`${API_BASE}/merchant-settings/${merchantId}/usdt-rate`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        usdtToNgnRate: newRate
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentRate = data.usdtToNgnRate;
+                    updateCurrentRateDisplay();
+                    updateExample();
+                    showAlert('✅ USDT rate updated successfully!', 'success');
+                } else {
+                    const errorData = await response.json();
+                    showAlert(errorData.error || 'Failed to update USDT rate', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                updateBtn.disabled = false;
+                updateBtn.textContent = 'Update Rate';
+            }
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertContainer.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Load data when page loads
+        loadInitialData();
+
+        // Update rate when merchant ID changes
+        document.getElementById('merchantId').addEventListener('change', fetchCurrentRate);
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+/* Add these to the end of your SuiFlowCheckout.css file */
+
+/* FlowX Integration Styles */
+.sui-flowx-option {
+  margin: 1.5rem 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.sui-flowx-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(37, 117, 252, 0.1);
+  color: var(--primary-500);
+  border: 1px solid var(--primary-500);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sui-flowx-toggle:hover {
+  background-color: rgba(37, 117, 252, 0.15);
+}
+
+.sui-flowx-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sui-flowx-widget-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: rgba(15, 23, 42, 0.05);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.sui-flowx-info {
+  margin: 0 0 1rem 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.sui-flowx-widget {
+  height: 420px;
+  width: 100%;
+  border-radius: 0.75rem;
+  background-color: white;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}

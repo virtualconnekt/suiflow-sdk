@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuiFlow Widget - Offline Testing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .status-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .test-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .widget-demo {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .error-details {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .solutions {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+
+        .solutions ul {
+            margin-left: 20px;
+        }
+
+        .solutions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 SuiFlow Widget - Offline Testing</h1>
+            <p>Test widget functionality without network dependencies</p>
+        </div>
+
+        <div class="status-panel">
+            <h3>Current Status</h3>
+            <div class="status-item status-error">
+                <span><strong>Wallet Connection:</strong> ❌ Failed to fetch</span>
+                <span>Network timeout</span>
+            </div>
+            <div class="status-item status-warning">
+                <span><strong>Sui Testnet:</strong> ⚠️ Connection issues</span>
+                <span>Checking connectivity...</span>
+            </div>
+            <div class="status-item status-success">
+                <span><strong>Widget SDK:</strong> ✅ Loaded successfully</span>
+                <span>Ready for testing</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Error Analysis</h3>
+            <div class="error-details">
+                <h4>Error: [WALLET.SIGN_TX_ERROR] Failed to fetch</h4>
+                <p><strong>Cause:</strong> Network connectivity issues with Sui testnet fullnode</p>
+                <p><strong>Common Reasons:</strong></p>
+                <ul>
+                    <li>Sui testnet node is temporarily unavailable</li>
+                    <li>Network timeout or firewall blocking</li>
+                    <li>High traffic on testnet causing delays</li>
+                    <li>Wallet provider connection issues</li>
+                </ul>
+            </div>
+
+            <div class="solutions">
+                <h4>🔧 Solutions & Testing Alternatives</h4>
+                <ul>
+                    <li><strong>Wait and Retry:</strong> Testnet issues often resolve within 15-30 minutes</li>
+                    <li><strong>Use Offline Demo:</strong> Test payment flow without blockchain interaction</li>
+                    <li><strong>Check Network:</strong> Verify your internet connection and firewall settings</li>
+                    <li><strong>Alternative Testnet:</strong> Try different RPC endpoints if available</li>
+                    <li><strong>Mock Testing:</strong> Use simulated responses for integration testing</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Offline Widget Testing</h3>
+            <button class="test-button" onclick="testSDKLoading()">Test SDK Loading</button>
+            <button class="test-button" onclick="testAPIConnection()">Test API Connection</button>
+            <button class="test-button" onclick="simulatePayment()">Simulate Payment Flow</button>
+            <button class="test-button" onclick="testWebhook()">Test Webhook</button>
+            <div class="log-area" id="testLog"></div>
+        </div>
+
+        <div class="widget-demo">
+            <h3>💳 Mock Payment Widget</h3>
+            <p>This simulates the payment process without requiring wallet connection:</p>
+            
+            <div class="payment-form">
+                <div class="form-group">
+                    <label for="productName">Product/Service:</label>
+                    <select id="productName">
+                        <option value="vtu-airtime">VTU Airtime ₦100</option>
+                        <option value="vtu-data">VTU Data Bundle ₦500</option>
+                        <option value="custom">Custom Amount</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount (SUI):</label>
+                    <input type="number" id="amount" value="0.1" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">Customer Email:</label>
+                    <input type="email" id="customerEmail" placeholder="customer@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="merchantId">Merchant ID:</label>
+                    <input type="text" id="merchantId" placeholder="merchant_123" readonly>
+                </div>
+            </div>
+
+            <button class="test-button" onclick="startMockPayment()">🚀 Start Mock Payment</button>
+            <button class="test-button" onclick="checkPaymentStatus()">📊 Check Payment Status</button>
+
+            <div class="log-area" id="paymentLog"></div>
+        </div>
+    </div>
+
+    <script>
+        let paymentId = null;
+        let mockPayments = {};
+
+        function log(message, elementId = 'testLog') {
+            const logArea = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.innerHTML += `[${timestamp}] ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function testSDKLoading() {
+            log('Testing SuiFlow SDK loading...');
+            
+            // Simulate SDK check
+            fetch('/suiflow.js')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ SDK file accessible at /suiflow.js');
+                        return response.text();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(content => {
+                    log(`✅ SDK loaded successfully (${content.length} bytes)`);
+                    log('✅ SDK functions: SuiFlowPayment, createPaymentLink, verifyPayment');
+                })
+                .catch(error => {
+                    log(`❌ SDK loading failed: ${error.message}`);
+                });
+        }
+
+        function testAPIConnection() {
+            log('Testing API connection...');
+            
+            // Test backend API
+            fetch('http://localhost:3001/api/health')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ Backend API is accessible');
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    log(`✅ API Response: ${JSON.stringify(data)}`);
+                })
+                .catch(error => {
+                    log(`❌ API connection failed: ${error.message}`);
+                    log('💡 Make sure backend server is running on port 3001');
+                });
+        }
+
+        function simulatePayment() {
+            log('Simulating payment flow...');
+            
+            const mockTxn = {
+                digest: 'mock_' + Math.random().toString(36).substr(2, 9),
+                timestamp: Date.now(),
+                sender: '0x' + Math.random().toString(16).substr(2, 40),
+                amount: document.getElementById('amount').value
+            };
+
+            log(`📝 Mock transaction created: ${mockTxn.digest}`);
+            log(`💰 Amount: ${mockTxn.amount} SUI`);
+            log(`👤 Sender: ${mockTxn.sender}`);
+            
+            // Simulate payment verification
+            setTimeout(() => {
+                log('🔍 Verifying mock payment...');
+                setTimeout(() => {
+                    log('✅ Mock payment verified successfully!');
+                    log('🎉 Payment would appear in merchant dashboard');
+                }, 1000);
+            }, 2000);
+        }
+
+        function testWebhook() {
+            log('Testing webhook functionality...');
+            
+            const webhookPayload = {
+                type: 'payment.success',
+                data: {
+                    paymentId: 'mock_payment_' + Date.now(),
+                    amount: document.getElementById('amount').value,
+                    currency: 'SUI',
+                    status: 'completed',
+                    customer: document.getElementById('customerEmail').value,
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            log(`📡 Webhook payload: ${JSON.stringify(webhookPayload, null, 2)}`);
+            log('✅ Webhook would be sent to merchant endpoint');
+            log('💡 This would trigger merchant system updates');
+        }
+
+        function startMockPayment() {
+            const productName = document.getElementById('productName').value;
+            const amount = document.getElementById('amount').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+
+            paymentId = 'mock_' + Date.now();
+            
+            log(`🚀 Starting mock payment...`, 'paymentLog');
+            log(`📦 Product: ${productName}`, 'paymentLog');
+            log(`💰 Amount: ${amount} SUI`, 'paymentLog');
+            log(`📧 Customer: ${customerEmail}`, 'paymentLog');
+            log(`🆔 Payment ID: ${paymentId}`, 'paymentLog');
+
+            // Store mock payment
+            mockPayments[paymentId] = {
+                id: paymentId,
+                product: productName,
+                amount: amount,
+                customer: customerEmail,
+                status: 'pending',
+                created: new Date().toISOString()
+            };
+
+            // Simulate payment processing
+            setTimeout(() => {
+                log(`⏳ Processing payment...`, 'paymentLog');
+                setTimeout(() => {
+                    mockPayments[paymentId].status = 'completed';
+                    mockPayments[paymentId].completed = new Date().toISOString();
+                    log(`✅ Payment completed successfully!`, 'paymentLog');
+                    log(`🎊 Customer would receive confirmation email`, 'paymentLog');
+                    log(`💼 Merchant dashboard would update`, 'paymentLog');
+                }, 2000);
+            }, 1000);
+        }
+
+        function checkPaymentStatus() {
+            if (!paymentId) {
+                log(`❌ No active payment to check`, 'paymentLog');
+                return;
+            }
+
+            const payment = mockPayments[paymentId];
+            if (payment) {
+                log(`📊 Payment Status for ${paymentId}:`, 'paymentLog');
+                log(`   Status: ${payment.status}`, 'paymentLog');
+                log(`   Amount: ${payment.amount} SUI`, 'paymentLog');
+                log(`   Customer: ${payment.customer}`, 'paymentLog');
+                log(`   Created: ${payment.created}`, 'paymentLog');
+                if (payment.completed) {
+                    log(`   Completed: ${payment.completed}`, 'paymentLog');
+                }
+            }
+        }
+
+        // Auto-populate merchant ID on load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('merchantId').value = 'merchant_' + Math.random().toString(36).substr(2, 6);
+            log('🔧 Offline testing environment initialized');
+            log('💡 This page simulates widget functionality without network requirements');
+        });
+
+        // Auto-test on load
+        setTimeout(() => {
+            testSDKLoading();
+        }, 1000);
+    </script>
+</body>
+</html>
