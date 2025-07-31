@@ -1,3 +1,18 @@
+## ⚠️ Hard-Locked Smart Contract Configuration
+
+> **Important:**
+>
+> The following smart contract settings are hard-locked in the SDK and **cannot be changed** by any means (not via `.env`, not via the constructor, and not via `configure()`):
+>
+> - `contractPackageId`: `0xce43cd5a753080bb1546a3b575ca48892204699b580d89df5f384ca77da4641a0`
+> - `contractObjectId`: `0x33baa75593ccc45a8edd06798ff6f0319d43287968590a90c3c593ff55b23574`
+> - `rpcUrl`: `https://fullnode.testnet.sui.io:443`
+> - `adminAddress`: `0x3ae1c107dfb3bf8f1c57932c7ab5d47f65330973bd95b2af702cbea6bc2a0f28`
+>
+> Any attempt to override these values will be ignored and a warning will be shown in the console. All contract-related features always use these official values.
+
+---
+
 # SuiFlow SDK
 
 🚀 **Easy blockchain payments for your web applications**
@@ -16,6 +31,8 @@ Built by [VirtualConnekt](https://virtualconnekt.com.ng) - Powering the future o
 - 🌐 **Universal** - Works with any website
 - ⚡ **Fast** - Instant payment confirmation
 - 🇳🇬 **Nigerian-Optimized** - Built for the African market
+- 📦 **Multiple Formats** - UMD, ES Modules, and CommonJS builds
+- 🔧 **TypeScript Support** - Full type definitions included
 
 ## 📦 Installation
 
@@ -29,9 +46,49 @@ npm install suiflow-sdk
 yarn add suiflow-sdk
 ```
 
+### Local Development Installation
+If you're developing locally or want to install from the SDK source:
+
+```bash
+# Install from local directory
+npm install /path/to/suiflow-sdk
+
+# Or from tarball
+npm install /path/to/suiflow-sdk-1.0.0.tgz
+
+# For active development (creates symlink)
+cd /path/to/suiflow-sdk
+npm link
+cd /path/to/your-project
+npm link suiflow-sdk
+```
+
 ### CDN
 ```html
+<!-- UMD build for direct browser usage -->
 <script src="https://unpkg.com/suiflow-sdk/dist/suiflow.js"></script>
+```
+
+## 🚀 Import Methods
+
+### ES Modules (Recommended)
+```javascript
+import { SuiFlow } from 'suiflow-sdk';
+import { SuiFlowProvider } from 'suiflow-sdk/react';
+```
+
+### CommonJS
+```javascript
+const { SuiFlow } = require('suiflow-sdk');
+```
+
+### UMD (Browser)
+```html
+<script src="https://unpkg.com/suiflow-sdk/dist/suiflow.js"></script>
+<script>
+    // Global Suiflow object is available
+    Suiflow.payWithWidget({ /* options */ });
+</script>
 ```
 
 ## Environment Variables Setup
@@ -41,7 +98,7 @@ Create a `.env` file in your project root:
 ```env
 # SuiFlow Configuration
 SUIFLOW_MERCHANT_ID=your-merchant-id-here
-SUIFLOW_PRODUCT_ID=your-product-id-here
+SUIFLOW_PRODUCT_ID=your-product-id-here ||optional||
 SUIFLOW_API_URL=https://suiflow.virtualconnekt.com.ng
 ```
 
@@ -163,7 +220,7 @@ Create a custom amount payment.
 
 ```javascript
 Suiflow.payWithWidget({
-    merchantId: '687b8e4455ee9491cb288826',
+    merchantId: 'your suiflow merchant id',
     amount: 5.0,
     onSuccess: (txHash, paidAmount) => {
         console.log('Success:', { txHash, paidAmount });
@@ -230,7 +287,7 @@ For easier environment variable management, use our configuration helper:
 
 ```javascript
 // Download suiflow-config.js from our GitHub repo
-import SuiFlowConfig from './suiflow-config.js';
+import { SuiFlowConfig } from 'suiflow-sdk';
 
 const config = new SuiFlowConfig();
 
@@ -244,19 +301,23 @@ const paymentOptions = config.getPaymentOptions(10.0, {
     }
 });
 
-Suiflow.payWithWidget(paymentOptions);
+SuiFlow.payWithWidget(paymentOptions);
 ```
 
 ### TypeScript Support
 
-```typescript
-import SuiFlow, { PaymentOptions, PaymentResult } from 'suiflow-sdk';
+The SDK includes full TypeScript definitions:
 
+```typescript
+import { SuiFlow, PaymentOptions, PaymentResult } from 'suiflow-sdk';
+import { SuiFlowProvider } from 'suiflow-sdk/react';
+
+// Type-safe payment options
 const paymentOptions: PaymentOptions = {
     merchantId: 'your-merchant-id',
     amount: 1.0,
     onSuccess: (txHash: string, amount: number) => {
-        // Handle success
+        // Handle success with full type safety
     },
     onError: (error: string) => {
         // Handle error
@@ -266,12 +327,47 @@ const paymentOptions: PaymentOptions = {
 SuiFlow.payWithWidget(paymentOptions);
 ```
 
+### Available Types
+
+```typescript
+// Main payment interface
+interface PaymentOptions {
+    merchantId: string;
+    amount: number;
+    onSuccess: (txHash: string, paidAmount: number) => void;
+    onError: (error: string) => void;
+}
+
+// Wallet integration types
+interface WalletConnection {
+    address: string;
+    isConnected: boolean;
+}
+
+// React provider props
+interface SuiFlowProviderProps {
+    children: React.ReactNode;
+    config?: SuiFlowConfig;
+}
+```
+
 ### React Integration
 
 ```jsx
 import React from 'react';
-import SuiFlow from 'suiflow-sdk';
+import { SuiFlow } from 'suiflow-sdk';
+import { SuiFlowProvider } from 'suiflow-sdk/react';
 
+// Using the React Provider (Recommended for React apps)
+function App() {
+    return (
+        <SuiFlowProvider>
+            <PaymentComponent />
+        </SuiFlowProvider>
+    );
+}
+
+// Or direct usage
 function PaymentButton({ amount, onPaymentSuccess }) {
     const handlePayment = () => {
         SuiFlow.payWithWidget({
@@ -302,7 +398,7 @@ function PaymentButton({ amount, onPaymentSuccess }) {
 </template>
 
 <script>
-import SuiFlow from 'suiflow-sdk';
+import { SuiFlow } from 'suiflow-sdk';
 
 export default {
     props: ['amount'],
@@ -324,16 +420,108 @@ export default {
 </script>
 ```
 
+## 🛠️ Development & Building
+
+### For SDK Contributors
+
+If you're contributing to the SDK or need to build it locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/virtualconnekt/suiflow-sdk.git
+cd suiflow-sdk
+
+# Install dependencies
+npm install
+
+# Build the SDK
+npm run build
+
+# Watch for changes during development
+npm run dev
+# or
+npm run build:watch
+```
+
+### Build Output
+
+The build process creates multiple formats:
+
+- `dist/suiflow.js` - UMD build for browsers (with sourcemap)
+- `dist/suiflow.esm.js` - ES Modules build (with sourcemap)  
+- `dist/suiflow.cjs.js` - CommonJS build (with sourcemap)
+- `dist/` - TypeScript declaration files (.d.ts)
+
+### After Making Changes
+
+When you modify the SDK source code:
+
+1. **Rebuild the SDK**: `npm run build`
+2. **If using npm link**: Changes are automatically available in linked projects
+3. **If installed locally**: Reinstall in your project:
+   ```bash
+   npm install /path/to/suiflow-sdk
+   ```
+
+### Package Scripts
+
+- `npm run build` - Build once
+- `npm run build:watch` - Build and watch for changes
+- `npm run dev` - Alias for build:watch
+- `npm run clean` - Clean the dist folder
+
 ## 🔧 Configuration
 
 ### Environment Setup
 
-Create a `.env` file in your project:
+You may use a `.env` file for merchant and environment settings (see `.env.example`), but **contract settings are always hard-locked** and cannot be changed.
 
 ```env
+# Only these are configurable:
 SUIFLOW_MERCHANT_ID=your-merchant-id-here
 SUIFLOW_ENVIRONMENT=testnet
+SUIFLOW_BASE_URL=http://localhost:5173
+SUIFLOW_ADMIN_FEE=0.01
 ```
+
+> **Note:**
+> The following are **not** configurable and will always use the official values:
+> - `SUIFLOW_PACKAGE_ID`
+> - `SUIFLOW_PROCESSOR_OBJECT_ID`
+> - `SUIFLOW_RPC_URL`
+> - `SUIFLOW_ADMIN_ADDRESS`
+
+### Peer Dependencies
+
+The SDK requires these peer dependencies in your project:
+
+```json
+{
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0",
+    "@mysten/dapp-kit": "^0.17.1",
+    "@mysten/sui": "^1.37.0",
+    "@tanstack/react-query": "^5.83.0"
+  }
+}
+```
+
+Install them in your project:
+
+```bash
+npm install react react-dom @mysten/dapp-kit @mysten/sui @tanstack/react-query
+```
+
+### Build Configuration
+
+The SDK is built with Rollup and provides three formats:
+
+- **UMD**: For direct browser usage (includes all dependencies except React)
+- **ES Modules**: For modern bundlers (external dependencies)
+- **CommonJS**: For Node.js environments (external dependencies)
+
+External dependencies (React, Sui libraries) are not bundled and must be provided by your application.
 
 ### Webpack Configuration
 
@@ -399,7 +587,9 @@ Suiflow.payWithWidget({
 
 ```javascript
 // Use testnet for development
-Suiflow.payWithWidget({
+import { SuiFlow } from 'suiflow-sdk';
+
+SuiFlow.payWithWidget({
     merchantId: 'your-test-merchant-id',
     amount: 0.01, // Small amount for testing
     environment: 'testnet', // Optional: defaults to testnet
@@ -415,9 +605,11 @@ For testing without actual blockchain transactions:
 
 ```javascript
 // Enable mock mode for unit tests
-Suiflow.setMockMode(true);
+import { SuiFlow } from 'suiflow-sdk';
 
-Suiflow.payWithWidget({
+SuiFlow.setMockMode(true);
+
+SuiFlow.payWithWidget({
     merchantId: 'test-merchant',
     amount: 1.0,
     onSuccess: (txHash, amount) => {
@@ -428,12 +620,28 @@ Suiflow.payWithWidget({
 });
 ```
 
+### Local Development Testing
+
+When testing with a locally built SDK:
+
+```bash
+# Build the SDK
+npm run build
+
+# Test in watch mode (rebuilds on changes)
+npm run dev
+
+# In your test project, reinstall the local SDK
+npm install /path/to/suiflow-sdk
+```
+
 ## 🔗 Links
 
-- [SuiFlow Dashboard](https://dashboard.suiflow.com) - Manage your account
-- [Documentation](https://docs.suiflow.com) - Full documentation
-- [GitHub](https://github.com/suiflow/suiflow-sdk) - Source code
-- [Support](https://support.suiflow.com) - Get help
+- [SuiFlow Dashboard](https://suiflow.virtualconnekt.com.ng) - Manage your account
+- [Documentation](https://docs.suiflow.virtualconnekt.com.ng) - Full documentation
+- [GitHub](https://github.com/virtualconnekt/suiflow-sdk) - Source code
+- [Support](https://support.virtualconnekt.com.ng) - Get help
+- [VirtualConnekt](https://virtualconnekt.com.ng) - Our main website
 
 ## 📄 License
 
@@ -443,13 +651,21 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Build and test: `npm run build`
+5. Submit a pull request
+
 ## 📞 Support
 
-- 📧 Email: support@suiflow.com
+- 📧 Email: support@virtualconnekt.com.ng
 - 💬 Discord: [SuiFlow Community](https://discord.gg/suiflow)
-- 📖 Docs: [docs.suiflow.com](https://docs.suiflow.com)
-- 🐛 Issues: [GitHub Issues](https://github.com/suiflow/suiflow-sdk/issues)
+- 📖 Docs: [docs.suiflow.virtualconnekt.com.ng](https://docs.suiflow.virtualconnekt.com.ng)
+- 🐛 Issues: [GitHub Issues](https://github.com/virtualconnekt/suiflow-sdk/issues)
+- x  x.com: [x community](@virtual_connekt)
 
 ---
-
-**Made with ❤️ by the SuiFlow Team**
+**Made with ❤️ by the VirtualConnekt Team**

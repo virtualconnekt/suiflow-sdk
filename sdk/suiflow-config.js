@@ -8,7 +8,7 @@ class SuiFlowConfig {
     constructor() {
         this.config = {
             merchantId: null,
-            apiUrl: 'https://suiflow.virtualconnekt.com.ng',
+            apiUrl: 'http://localhost:5173',
             environment: 'production'
         };
         this.loadConfig();

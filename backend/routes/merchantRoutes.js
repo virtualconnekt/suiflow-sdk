@@ -1,8 +1,13 @@
 // Backend API endpoint to provide merchant wallet address
 // Add this to your backend routes
 
+import express from 'express';
+const router = express.Router();
+import Merchant from '../models/Merchant.js';
+import { authenticateToken } from '../middleware/auth.js';
+
 // GET /api/merchants/:merchantId
-app.get('/api/merchants/:merchantId', async (req, res) => {
+router.get('/:merchantId', async (req, res) => {
     try {
         const merchantId = req.params.merchantId;
         
@@ -16,7 +21,7 @@ app.get('/api/merchants/:merchantId', async (req, res) => {
         // Return wallet address for smart contract payments
         res.json({
             merchantId: merchant._id,
-            walletAddress: merchant.suiWalletAddress, // Add this field to Merchant model
+            walletAddress: merchant.walletAddress, // Use walletAddress to match your DB
             businessName: merchant.businessName,
             // Don't expose sensitive data
         });
@@ -29,7 +34,7 @@ app.get('/api/merchants/:merchantId', async (req, res) => {
 
 // POST /api/merchants/:merchantId/wallet
 // Endpoint for merchants to set their wallet address
-app.post('/api/merchants/:merchantId/wallet', authenticateUser, async (req, res) => {
+router.post('/:merchantId/wallet', authenticateToken, async (req, res) => {
     try {
         const merchantId = req.params.merchantId;
         const { walletAddress } = req.body;
@@ -56,3 +61,5 @@ app.post('/api/merchants/:merchantId/wallet', authenticateUser, async (req, res)
         res.status(500).json({ error: 'Server error' });
     }
 });
+
+export default router;

@@ -42,7 +42,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/widget/pay',
-    element: <WidgetPay />,
+    element: <SuiFlowCheckout />,
   },
   {
     path: '/flowx',

@@ -79,7 +79,7 @@ const merchantSettingsSchema = new mongoose.Schema({
 });
 
 // Indexes
-merchantSettingsSchema.index({ merchantId: 1 });
+// Note: merchantId already has a unique index from the schema definition
 merchantSettingsSchema.index({ usdtToNgnRate: 1 });
 
 // Methods

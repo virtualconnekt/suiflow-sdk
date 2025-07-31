@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { WalletProvider, ConnectButton, useWallet } from '@suiet/wallet-kit';
 import '@suiet/wallet-kit/style.css';
 import { TransactionBlock } from '@mysten/sui.js/transactions';
@@ -52,6 +52,18 @@ const PaymentStep = ({ step, currentStep, title, children }) => (
 
 const CheckoutContent = () => {
   const { productId } = useParams();
+  const [searchParams] = useSearchParams();
+  
+  // Widget payment parameters
+  const merchantId = searchParams.get('merchantId');
+  const initialAmount = searchParams.get('amount');
+
+  // Determine if this is a widget payment or product payment
+  const isWidgetPayment = !productId && merchantId;
+
+  // Widget amount (parsed from initialAmount)
+  const widgetAmount = isWidgetPayment ? parseFloat(initialAmount) || 0 : 0;
+  
   const wallet = useWallet();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -67,18 +79,36 @@ const CheckoutContent = () => {
   const [convertedAmount, setConvertedAmount] = useState(null);
   const [currencyLoading, setCurrencyLoading] = useState(false);
   const [showFlowXWidget, setShowFlowXWidget] = useState(false);
+  
+  // Widget-specific state
+  const [merchantAddress, setMerchantAddress] = useState('');
 
-  console.log('CheckoutContent rendered with productId:', productId);
+  console.log('CheckoutContent rendered with productId:', productId, 'merchantId:', merchantId, 'isWidgetPayment:', isWidgetPayment);
 
   useEffect(() => {
-    async function fetchProduct() {
+    async function fetchProductOrSetupWidget() {
       setError('');
-      console.log('Fetching product with ID:', productId);
+      
+      if (isWidgetPayment) {
+        // For widget payments, create a mock product object
+        console.log('Setting up widget payment for merchant:', merchantId);
+        setProduct({
+          name: `Payment to ${merchantId}`,
+          description: 'Widget Payment',
+          priceInSui: initialAmount || '0',
+          merchantAddress: '', // Will be fetched separately
+          paymentLink: '',
+          redirectURL: null
+        });
+        return;
+      }
       
       if (!productId) {
         setError('No product ID provided');
         return;
       }
+      
+      console.log('Fetching product with ID:', productId);
       
       try {
         const res = await fetch(`http://localhost:4000/api/products/${productId}`);
@@ -98,8 +128,8 @@ const CheckoutContent = () => {
         setError('Failed to load product: ' + e.message);
       }
     }
-    fetchProduct();
-  }, [productId]);
+    fetchProductOrSetupWidget();
+  }, [productId, merchantId, initialAmount, isWidgetPayment]);
 
   // Fetch exchange rate on component mount
   useEffect(() => {
@@ -118,12 +148,36 @@ const CheckoutContent = () => {
     fetchExchangeRate();
   }, []);
 
+  // Fetch merchant address for widget payments
+  useEffect(() => {
+    async function fetchMerchantAddress() {
+      if (!isWidgetPayment || !merchantId || !initialAmount) return;
+      try {
+        const res = await fetch('http://localhost:4000/api/widget-payments/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ merchantId, amount: initialAmount })
+        });
+        const data = await res.json();
+        if (res.ok && data.merchantAddress) {
+          setMerchantAddress(data.merchantAddress);
+          // Update the mock product with the merchant address
+          setProduct(prev => prev ? { ...prev, merchantAddress: data.merchantAddress } : null);
+        }
+      } catch (e) {
+        console.error('Failed to fetch merchant address:', e);
+      }
+    }
+    fetchMerchantAddress();
+  }, [isWidgetPayment, merchantId, initialAmount]);
+
   // Convert amount when currency selection changes
   useEffect(() => {
-    if (product && product.priceInSui) {
-      convertCurrency(product.priceInSui, 'SUI', selectedCurrency);
+    const priceToConvert = isWidgetPayment ? widgetAmount : (product?.priceInSui);
+    if (priceToConvert) {
+      convertCurrency(priceToConvert, 'SUI', selectedCurrency);
     }
-  }, [selectedCurrency, product, exchangeRate]);
+  }, [selectedCurrency, product, exchangeRate, isWidgetPayment, widgetAmount]);
 
   const convertCurrency = async (amount, fromCurrency, toCurrency) => {
     if (fromCurrency === toCurrency) {
@@ -178,6 +232,14 @@ const CheckoutContent = () => {
   };
 
   const getDisplayAmount = () => {
+    if (isWidgetPayment) {
+      if (selectedCurrency === 'SUI') {
+        return formatCurrency(widgetAmount, 'SUI');
+      } else {
+        return convertedAmount ? formatCurrency(convertedAmount, 'NGN') : 'Converting...';
+      }
+    }
+    
     if (!product) return '';
     
     if (selectedCurrency === 'SUI') {
@@ -189,7 +251,17 @@ const CheckoutContent = () => {
 
   const getActualPaymentAmount = () => {
     // Always pay in SUI on blockchain
+    if (isWidgetPayment) {
+      return widgetAmount || 0;
+    }
     return product ? product.priceInSui : 0;
+  };
+
+  const getMerchantAddress = () => {
+    if (isWidgetPayment) {
+      return merchantAddress;
+    }
+    return product ? product.merchantAddress : '';
   };
 
   useEffect(() => {
@@ -230,27 +302,52 @@ const CheckoutContent = () => {
     setSuccess('');
     
     try {
-      const paymentRes = await fetch('http://localhost:4000/api/payments/create', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        },
-        body: JSON.stringify({ productId })
-      });
+      let paymentData, paymentId;
       
-      const paymentData = await paymentRes.json();
-      if (!paymentRes.ok) {
-        setError(paymentData.message || 'Failed to create payment entry.');
-        setPaymentProcessing(false);
-        return;
+      if (isWidgetPayment) {
+        // Widget payment flow
+        const createRes = await fetch('http://localhost:4000/api/widget-payments/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            merchantId, 
+            amount: parseFloat(product.priceInSui),
+            currency: selectedCurrency,
+            originalAmount: parseFloat(product.priceInSui),
+            exchangeRate: exchangeRate || 1500
+          })
+        });
+        
+        paymentData = await createRes.json();
+        if (!createRes.ok) {
+          setError(paymentData.message || 'Failed to create payment entry.');
+          setPaymentProcessing(false);
+          return;
+        }
+        paymentId = paymentData.paymentId;
+        
+      } else {
+        // Product payment flow
+        const paymentRes = await fetch('http://localhost:4000/api/payments/create', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify({ productId })
+        });
+        
+        paymentData = await paymentRes.json();
+        if (!paymentRes.ok) {
+          setError(paymentData.message || 'Failed to create payment entry.');
+          setPaymentProcessing(false);
+          return;
+        }
+        paymentId = paymentData.paymentId;
       }
       
-      const paymentId = paymentData.paymentId;
       console.log('Payment created successfully:', paymentData);
       console.log('Payment ID for verification:', paymentId);
-      console.log('Payment ID type:', typeof paymentId);
-      console.log('Payment ID length:', paymentId?.length);
       
       // Validate payment ID format (MongoDB ObjectId is 24 characters)
       if (!paymentId || paymentId.length !== 24) {
@@ -260,12 +357,12 @@ const CheckoutContent = () => {
       }
       
       const txb = new TransactionBlock();
-      const amountInMist = Math.floor(parseFloat(product.priceInSui) * 1_000_000_000);
+      const amountInMist = Math.floor(parseFloat(getActualPaymentAmount()) * 1_000_000_000);
       
-      console.log(`Transferring ${product.priceInSui} SUI (${amountInMist} MIST) to ${product.merchantAddress}`);
+      console.log(`Transferring ${getActualPaymentAmount()} SUI (${amountInMist} MIST) to ${getMerchantAddress()}`);
       
       const [coin] = txb.splitCoins(txb.gas, [txb.pure(amountInMist)]);
-      txb.transferObjects([coin], txb.pure(product.merchantAddress, 'address'));
+      txb.transferObjects([coin], txb.pure(getMerchantAddress(), 'address'));
       txb.setGasBudget(100_000_000);
       
       const response = await wallet.signAndExecuteTransactionBlock({
@@ -294,7 +391,12 @@ const CheckoutContent = () => {
       console.log('Transaction Hash:', response.digest);
       console.log('Customer Wallet:', wallet.account?.address);
       
-      const verifyRes = await fetch(`http://localhost:4000/api/payments/verify/${paymentId}`, {
+      // Use different verify endpoints based on payment type
+      const verifyEndpoint = isWidgetPayment 
+        ? `http://localhost:4000/api/widget-payments/verify/${paymentId}`
+        : `http://localhost:4000/api/payments/verify/${paymentId}`;
+      
+      const verifyRes = await fetch(verifyEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -304,7 +406,7 @@ const CheckoutContent = () => {
         }),
       });
       
-      console.log('Verification URL:', `http://localhost:4000/api/payments/verify/${paymentId}`);
+      console.log('Verification URL:', verifyEndpoint);
       console.log('Verification request body:', {
         txnHash: response.digest,
         customerWallet: wallet.account?.address,
@@ -349,7 +451,7 @@ const CheckoutContent = () => {
     }
   };
 
-  if (!productId) {
+  if (!productId && !isWidgetPayment) {
     return (
       <div className="sui-checkout-container">
         <div className="sui-checkout-header">
@@ -360,14 +462,14 @@ const CheckoutContent = () => {
         <div className="sui-checkout-content">
           <div className="sui-error-message">
             <h2>Invalid Checkout Link</h2>
-            <p>No product ID provided. Please use a valid checkout link.</p>
+            <p>No product ID or widget payment parameters provided. Please use a valid checkout link.</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!product) {
+  if (!product && !isWidgetPayment) {
     return (
       <div className="sui-checkout-container">
         <div className="sui-checkout-header">
@@ -378,7 +480,7 @@ const CheckoutContent = () => {
         <div className="sui-checkout-content">
           <div className="sui-checkout-loading">
             <div className="sui-loading-spinner"></div>
-            <p>Loading product details...</p>
+            <p>Loading checkout...</p>
             {error && <p className="sui-error-text">{error}</p>}
           </div>
         </div>
@@ -404,8 +506,8 @@ const CheckoutContent = () => {
             <SuiIcon />
           </div>
           <div className="sui-product-details">
-            <h2>{product.name}</h2>
-            <p>{product.description}</p>
+            <h2>{isWidgetPayment ? 'Widget Payment' : product.name}</h2>
+            <p>{isWidgetPayment ? `Payment to ${merchantId || 'merchant'}` : product.description}</p>
             
             {/* Currency Selection */}
             <div className="sui-currency-selector">
@@ -440,7 +542,7 @@ const CheckoutContent = () => {
                     <span className="sui-price-amount">{getDisplayAmount()}</span>
                     {selectedCurrency === 'NGN' && (
                       <div className="sui-price-conversion">
-                        ≈ {formatCurrency(product.priceInSui, 'SUI')}
+                        ≈ {formatCurrency(getActualPaymentAmount(), 'SUI')}
                       </div>
                     )}
                   </>
@@ -508,16 +610,16 @@ const CheckoutContent = () => {
                 
                 <div className="sui-payment-summary">
                   <div className="sui-summary-item">
-                    <span>Product</span>
-                    <span>{product.name}</span>
+                    <span>{isWidgetPayment ? 'Widget Payment' : 'Product'}</span>
+                    <span>{isWidgetPayment ? `Payment to ${merchantId || 'merchant'}` : product.name}</span>
                   </div>
                   <div className="sui-summary-item">
                     <span>Amount</span>
-                    <span>{parseFloat(product.priceInSui).toFixed(4)} SUI</span>
+                    <span>{parseFloat(getActualPaymentAmount()).toFixed(4)} SUI</span>
                   </div>
                   <div className="sui-summary-item sui-total">
                     <span>Total</span>
-                    <span>{parseFloat(product.priceInSui).toFixed(4)} SUI</span>
+                    <span>{parseFloat(getActualPaymentAmount()).toFixed(4)} SUI</span>
                   </div>
                 </div>
                 
@@ -543,7 +645,7 @@ const CheckoutContent = () => {
                       <div className="sui-flowx-iframe-container">
                         <SwapWidget 
                           config={{
-                            defaultAmount: product ? product.priceInSui : 1,
+                            defaultAmount: getActualPaymentAmount() || 1,
                             defaultInputToken: '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::USDC',
                             defaultOutputToken: '0x2::sui::SUI',
                             network: 'testnet',
@@ -589,7 +691,7 @@ const CheckoutContent = () => {
                   ) : (
                     <>
                       <SuiIcon />
-                      Pay {parseFloat(product.priceInSui).toFixed(4)} SUI
+                      Pay {parseFloat(getActualPaymentAmount()).toFixed(4)} SUI
                     </>
                   )}
                 </button>
@@ -622,7 +724,7 @@ const CheckoutContent = () => {
                 >
                   Close Window
                 </button>
-                {product.redirectURL && (
+                {product && product.redirectURL && (
                   <button 
                     onClick={() => window.location.href = product.redirectURL}
                     className="sui-button sui-button-primary"
