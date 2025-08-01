@@ -199,27 +199,24 @@ export class SuiFlowCore {
     const { merchantId, amount, productId, onSuccess, onError, onProgress } = options;
     // Default productId to 'general' if not provided
     const finalProductId = productId ?? 'general';
-    if (!this.isSmartContractEnabled()) {
-      const errMsg = 'Smart contract payment is required but not configured.';
-      if (onProgress) onProgress('❌ ' + errMsg);
-      onError(errMsg);
-      return;
-    }
-    try {
-      if (onProgress) onProgress('🔍 Fetching merchant details...');
-      const merchantData = await this.getMerchantData(merchantId);
-      if (merchantData && merchantData.walletAddress) {
-        // Forward finalProductId to payWithContract
-        return await this.payWithContract({ ...options, merchantAddress: merchantData.walletAddress, productId: finalProductId });
-      } else {
-        const errMsg = 'Merchant wallet not found. Cannot proceed with smart contract payment.';
-        if (onProgress) onProgress('❌ ' + errMsg);
-        onError(errMsg);
+    let triedSmartContract = false;
+    if (this.isSmartContractEnabled()) {
+      try {
+        if (onProgress) onProgress('🔍 Fetching merchant details...');
+        const merchantData = await this.getMerchantData(merchantId);
+        if (merchantData && merchantData.walletAddress) {
+          // Forward finalProductId to payWithContract
+          triedSmartContract = true;
+          return await this.payWithContract({ ...options, merchantAddress: merchantData.walletAddress, productId: finalProductId });
+        } else {
+          if (onProgress) onProgress('⚠️ Merchant wallet not found, falling back to popup...');
+        }
+      } catch (contractError: any) {
+        if (onProgress) onProgress('🔄 Smart contract failed, falling back to popup...');
       }
-    } catch (contractError: any) {
-      if (onProgress) onProgress('❌ Smart contract payment failed.');
-      onError(contractError.message || 'Smart contract payment failed.');
     }
+    // Fallback to popup if smart contract fails or is not enabled
+    return this.payWithPopup(options);
   }
 
   payWithPopup(options: PaymentOptions): void {
